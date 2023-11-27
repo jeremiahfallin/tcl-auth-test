@@ -1,5 +1,6 @@
 {
 	"hosting": {
+		"site": "tcl-auth-test",
 		"public": "public",
 		"ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
 	},
