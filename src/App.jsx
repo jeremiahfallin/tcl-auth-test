@@ -3,8 +3,9 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AddItem, Home, Layout, List } from './views';
 
 import { useShoppingListData } from './api';
-
 import { useStateWithStorage } from './utils';
+
+import { useAuth } from './api/useAuth';
 
 export function App() {
 	/**
@@ -18,24 +19,45 @@ export function App() {
 	 * have tokens), and use `setListToken` when we allow a user
 	 * to create and join a new list.
 	 */
-	const [listToken, setListToken] = useStateWithStorage(
-		'tcl-shopping-list-token',
-		'my test list',
+	const { user } = useAuth();
+	const userId = user?.uid;
+	const userEmail = user?.email;
+	const [currentShoppingList, setCurrentShoppingList] = useStateWithStorage(
+		'currentShoppingList',
+		null,
 	);
 
 	/**
 	 * This custom hook takes our token and fetches the data for our list.
 	 * Check ./api/firestore.js for its implementation.
 	 */
-	const data = useShoppingListData(listToken);
+	const data = useShoppingListData(userId, userEmail);
 
 	return (
 		<Router>
 			<Routes>
 				<Route path="/" element={<Layout />}>
-					<Route index element={<Home />} />
+					<Route
+						index
+						element={
+							<Home
+								data={data}
+								setCurrentShoppingList={setCurrentShoppingList}
+								userEmail={userEmail}
+								userId={userId}
+							/>
+						}
+					/>
 					<Route path="/list" element={<List data={data} />} />
-					<Route path="/add-item" element={<AddItem />} />
+					<Route
+						path="/add-item"
+						element={
+							<AddItem
+								currentShoppingList={currentShoppingList}
+								userId={userId}
+							/>
+						}
+					/>
 				</Route>
 			</Routes>
 		</Router>

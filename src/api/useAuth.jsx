@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { auth } from './config.js';
 import { GoogleAuthProvider, signInWithRedirect } from 'firebase/auth';
+import { addUserToDatabase } from './firebase.js';
 
 export const SignInButton = () => (
 	<button
@@ -21,7 +22,12 @@ export const useAuth = () => {
 	const [user, setUser] = useState(null);
 
 	useEffect(() => {
-		auth.onAuthStateChanged((user) => setUser(user));
+		auth.onAuthStateChanged((user) => {
+			setUser(user);
+			if (user) {
+				addUserToDatabase(user);
+			}
+		});
 	}, []);
 
 	return { user };

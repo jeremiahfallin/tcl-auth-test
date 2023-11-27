@@ -1,4 +1,13 @@
-import { collection, onSnapshot } from 'firebase/firestore';
+import {
+	addDoc,
+	arrayUnion,
+	collection,
+	doc,
+	getDoc,
+	onSnapshot,
+	setDoc,
+	updateDoc,
+} from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { db } from './config';
 import { getFutureDate } from '../utils';
@@ -6,41 +15,56 @@ import { getFutureDate } from '../utils';
 /**
  * A custom hook that subscribes to a shopping list in our Firestore database
  * and returns new data whenever the list changes.
- * @param {string | null} listId
+ * @param {string | null} userId
  * @see https://firebase.google.com/docs/firestore/query-data/listen
  */
-export function useShoppingListData(listId) {
+export function useShoppingListData(userId, userEmail) {
 	// Start with an empty array for our data.
 	/** @type {import('firebase/firestore').DocumentData[]} */
 	const initialState = [];
 	const [data, setData] = useState(initialState);
 
 	useEffect(() => {
-		if (!listId) return;
+		if (!userId) return;
 
-		// When we get a listId, we use it to subscribe to real-time updates
-		// from Firestore.
-		return onSnapshot(collection(db, listId), (snapshot) => {
-			// The snapshot is a real-time update. We iterate over the documents in it
-			// to get the data.
-			const nextData = snapshot.docs.map((docSnapshot) => {
-				// Extract the document's data from the snapshot.
-				const item = docSnapshot.data();
+		const userDocRef = doc(db, 'users', userEmail);
 
-				// The document's id is not in the data,
-				// but it is very useful, so we add it to the data ourselves.
-				item.id = docSnapshot.id;
+		onSnapshot(userDocRef, (docSnap) => {
+			if (docSnap.exists()) {
+				const listRefs = docSnap.data().sharedLists;
 
-				return item;
-			});
-
-			// Update our React state with the new data.
-			setData(nextData);
+				listRefs.forEach((listRef) => {
+					onSnapshot(collection(db, listRef.path, 'items'), (snapshot) => {
+						const listItems = snapshot.docs.map((docSnapshot) => ({
+							...docSnapshot.data(),
+							id: docSnapshot.id,
+						}));
+						setData((prevData) => ({
+							...prevData,
+							[listRef.id]: listItems,
+						}));
+					});
+				});
+			}
 		});
-	}, [listId]);
+	}, [userId, userEmail]);
 
 	// Return the data so it can be used by our React components.
 	return data;
+}
+
+export async function addList(userId, userEmail, listName) {
+	const listDocRef = doc(db, userId, listName);
+
+	await setDoc(listDocRef, {
+		owner: userId,
+	});
+
+	const userDocumentRef = doc(db, 'users', userEmail);
+
+	updateDoc(userDocumentRef, {
+		sharedLists: arrayUnion(listDocRef),
+	});
 }
 
 /**
@@ -50,17 +74,19 @@ export function useShoppingListData(listId) {
  * @param {string} itemData.itemName The name of the item.
  * @param {number} itemData.daysUntilNextPurchase The number of days until the user thinks they'll need to buy the item again.
  */
-export async function addItem(listId, { itemName, daysUntilNextPurchase }) {
-	const listCollectionRef = collection(db, listId);
-	// TODO: Replace this call to console.log with the appropriate
-	// Firebase function, so this information is sent to your database!
-	return console.log(listCollectionRef, {
+export async function addItem(
+	userId,
+	listName,
+	{ itemName, daysUntilNextPurchase },
+) {
+	const listCollectionRef = collection(db, userId, listName, 'items');
+
+	addDoc(listCollectionRef, {
 		dateCreated: new Date(),
-		// NOTE: This is null because the item has just been created.
-		// We'll use updateItem to put a Date here when the item is purchased!
 		dateLastPurchased: null,
 		dateNextPurchased: getFutureDate(daysUntilNextPurchase),
 		name: itemName,
+		owner: userId,
 		totalPurchases: 0,
 	});
 }
@@ -79,4 +105,32 @@ export async function deleteItem() {
 	 * to delete an existing item. You'll need to figure out what arguments
 	 * this function must accept!
 	 */
+}
+
+export async function shareList(userId, listName, userToShareWith) {
+	const userRef = collection(db, 'users');
+	const userDoc = await getDoc(doc(userRef, userToShareWith));
+	if (!userDoc.exists()) {
+		return;
+	}
+	const listDocumentRef = doc(db, userId, listName);
+	const userDocumentRef = doc(db, 'users', userToShareWith);
+
+	updateDoc(userDocumentRef, {
+		sharedLists: arrayUnion(listDocumentRef),
+	});
+}
+
+export async function addUserToDatabase(user) {
+	const userRef = collection(db, 'users');
+	const userDoc = await getDoc(doc(userRef, user.email));
+	if (userDoc.exists()) {
+		return;
+	} else {
+		await setDoc(doc(db, 'users', user.email), {
+			email: user.email,
+			name: user.displayName,
+			uid: user.uid,
+		});
+	}
 }
