@@ -4,13 +4,13 @@ import { getAuth } from 'firebase/auth';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-	apiKey: 'AIzaSyCbWk5hSHCZIOcrBFmcz64oK8sYxeMip4U',
-	authDomain: 'tcl-auth-test.web.app',
-	databaseURL: 'https://tcl-auth-test-default-rtdb.firebaseio.com',
-	projectId: 'tcl-auth-test',
-	storageBucket: 'tcl-auth-test.appspot.com',
-	messagingSenderId: '80791769865',
-	appId: '1:80791769865:web:2ee17ceae0ae076089b9d8',
+	apiKey: 'AIzaSyC7OaB7xhAhsTrJuVbxVANqbRmK_4a5yN0',
+	authDomain: 'tcl-d3efb.firebaseapp.com',
+	projectId: 'tcl-d3efb',
+	storageBucket: 'tcl-d3efb.appspot.com',
+	messagingSenderId: '1029768376335',
+	appId: '1:1029768376335:web:2ea21f7b4a85a4c40af37a',
+	measurementId: 'G-TRPWTNBXS6',
 };
 
 // Initialize Firebase
