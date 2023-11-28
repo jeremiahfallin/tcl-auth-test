@@ -5,7 +5,7 @@ import { getAuth } from 'firebase/auth';
 // Your web app's Firebase configuration
 const firebaseConfig = {
 	apiKey: 'AIzaSyCbWk5hSHCZIOcrBFmcz64oK8sYxeMip4U',
-	authDomain: 'tcl-auth-test.web.com',
+	authDomain: 'tcl-auth-test.web.app',
 	databaseURL: 'https://tcl-auth-test-default-rtdb.firebaseio.com',
 	projectId: 'tcl-auth-test',
 	storageBucket: 'tcl-auth-test.appspot.com',
