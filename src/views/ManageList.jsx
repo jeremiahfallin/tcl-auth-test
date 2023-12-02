@@ -1,6 +1,6 @@
 import { addItem, shareList } from '../api';
 
-export function AddItem({ userId, currentShoppingList }) {
+export function ManageList({ userId, currentShoppingList }) {
 	const handleSubmit = (e) => {
 		e.preventDefault();
 		const itemName = e.target.itemName.value;
@@ -19,6 +19,9 @@ export function AddItem({ userId, currentShoppingList }) {
 
 	return (
 		<div>
+			<p>
+				Current shopping list: <strong>{currentShoppingList}</strong>
+			</p>
 			<form onSubmit={handleSubmit}>
 				<label htmlFor="itemName">Item name</label>
 				<input id="itemName" type="text" />
