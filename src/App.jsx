@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-import { AddItem, Home, Layout, List } from './views';
+import { ManageList, Home, Layout, List } from './views';
 
 import { useShoppingListData } from './api';
 import { useStateWithStorage } from './utils';
@@ -42,6 +42,7 @@ export function App() {
 						element={
 							<Home
 								data={data}
+								currentShoppingList={currentShoppingList}
 								setCurrentShoppingList={setCurrentShoppingList}
 								userEmail={userEmail}
 								userId={userId}
@@ -52,7 +53,7 @@ export function App() {
 					<Route
 						path="/add-item"
 						element={
-							<AddItem
+							<ManageList
 								currentShoppingList={currentShoppingList}
 								userId={userId}
 							/>
