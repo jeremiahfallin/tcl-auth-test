@@ -49,9 +49,14 @@ export function App() {
 							/>
 						}
 					/>
-					<Route path="/list" element={<List data={data} />} />
 					<Route
-						path="/add-item"
+						path="/list"
+						element={
+							<List data={data} currentShoppingList={currentShoppingList} />
+						}
+					/>
+					<Route
+						path="/manage-list"
 						element={
 							<ManageList
 								currentShoppingList={currentShoppingList}

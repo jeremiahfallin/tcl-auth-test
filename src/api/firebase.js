@@ -32,17 +32,16 @@ export function useShoppingListData(userId, userEmail) {
 		onSnapshot(userDocRef, (docSnap) => {
 			if (docSnap.exists()) {
 				const listRefs = docSnap.data().sharedLists;
-
 				listRefs.forEach((listRef) => {
 					onSnapshot(collection(db, listRef.path, 'items'), (snapshot) => {
 						const listItems = snapshot.docs.map((docSnapshot) => ({
 							...docSnapshot.data(),
 							id: docSnapshot.id,
 						}));
-						setData((prevData) => ({
+						setData((prevData) => [
 							...prevData,
-							[listRef.id]: listItems,
-						}));
+							{ name: listRef.id, path: listRef.path, items: listItems },
+						]);
 					});
 				});
 			}
@@ -53,6 +52,12 @@ export function useShoppingListData(userId, userEmail) {
 	return data;
 }
 
+/**
+ * Add a new list to the user's lists in Firestore.
+ * @param {string} userId The id of the user who owns the list.
+ * @param {string} userEmail The email of the user who owns the list.
+ * @param {string} listName The name of the new list.
+ */
 export async function addList(userId, userEmail, listName) {
 	const listDocRef = doc(db, userId, listName);
 
@@ -69,6 +74,7 @@ export async function addList(userId, userEmail, listName) {
 
 /**
  * Add a new item to the user's list in Firestore.
+ * @param {string} userId The id of the user who owns the list.
  * @param {string} listId The id of the list we're adding to.
  * @param {Object} itemData Information about the new item.
  * @param {string} itemData.itemName The name of the item.
@@ -91,22 +97,13 @@ export async function addItem(
 	});
 }
 
-export async function updateItem() {
-	/**
-	 * TODO: Fill this out so that it uses the correct Firestore function
-	 * to update an existing item. You'll need to figure out what arguments
-	 * this function must accept!
-	 */
-}
-
-export async function deleteItem() {
-	/**
-	 * TODO: Fill this out so that it uses the correct Firestore function
-	 * to delete an existing item. You'll need to figure out what arguments
-	 * this function must accept!
-	 */
-}
-
+/**
+ * Shares a list with another user.
+ * @param {string} userId The id of the user who owns the list.
+ * @param {string} listName The name of the list to share.
+ * @param {string} userToShareWith The email of the user to share the list with.
+ * @returns
+ */
 export async function shareList(userId, listName, userToShareWith) {
 	const userRef = collection(db, 'users');
 	const userDoc = await getDoc(doc(userRef, userToShareWith));
@@ -121,6 +118,10 @@ export async function shareList(userId, listName, userToShareWith) {
 	});
 }
 
+/**
+ * Add a new user to the users collection in Firestore.
+ * @param {Object} user The user object from Firebase Auth.
+ */
 export async function addUserToDatabase(user) {
 	const userRef = collection(db, 'users');
 	const userDoc = await getDoc(doc(userRef, user.email));
@@ -133,4 +134,20 @@ export async function addUserToDatabase(user) {
 			uid: user.uid,
 		});
 	}
+}
+
+export async function updateItem() {
+	/**
+	 * TODO: Fill this out so that it uses the correct Firestore function
+	 * to update an existing item. You'll need to figure out what arguments
+	 * this function must accept!
+	 */
+}
+
+export async function deleteItem() {
+	/**
+	 * TODO: Fill this out so that it uses the correct Firestore function
+	 * to delete an existing item. You'll need to figure out what arguments
+	 * this function must accept!
+	 */
 }
